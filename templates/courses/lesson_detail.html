@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load course_extras %}
 
 {% block title %}{{ lesson.title }} — Python{% endblock %}
 
@@ -49,6 +50,32 @@
                             <p>{{ task.hint }}</p>
                         </details>
                     {% endif %}
+
+                    {% with sub=submission_map|get_item:task.pk %}
+                        {% if sub %}
+                            <div class="submission-status submission-status--{{ sub.status }}">
+                                <strong>Статус работы:</strong> {{ sub.get_status_display }}
+                                {% if sub.comment %}
+                                    <p class="submission-comment">{{ sub.comment }}</p>
+                                {% endif %}
+                            </div>
+                            {% if sub.status != 'accepted' %}
+                                <form method="post" action="{% url 'courses:task_submit' task.pk %}" enctype="multipart/form-data" class="submission-form">
+                                    {% csrf_token %}
+                                    <label>Загрузить новый файл:</label>
+                                    <input type="file" name="file" required>
+                                    <button type="submit" class="btn btn-outline btn-sm">Отправить повторно</button>
+                                </form>
+                            {% endif %}
+                        {% else %}
+                            <form method="post" action="{% url 'courses:task_submit' task.pk %}" enctype="multipart/form-data" class="submission-form">
+                                {% csrf_token %}
+                                <label>Загрузить файл с работой:</label>
+                                <input type="file" name="file" required>
+                                <button type="submit" class="btn btn-primary btn-sm">Отправить на проверку</button>
+                            </form>
+                        {% endif %}
+                    {% endwith %}
                 </div>
             {% endfor %}
         </section>
@@ -91,16 +118,21 @@
         ← Вернуться к разделу
     </a>
     {% if not is_completed %}
-        {% if quizzes_ok %}
+        {% if quizzes_ok and tasks_ok %}
             <form method="post" action="{% url 'courses:lesson_complete' lesson.slug %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-success">Отметить урок как пройденный ✓</button>
             </form>
         {% else %}
-            <span class="btn btn-success" style="opacity:.4;cursor:not-allowed;" title="Сначала сдайте все тесты">
+            <span class="btn btn-success" style="opacity:.4;cursor:not-allowed;">
                 Отметить урок как пройденный ✓
             </span>
-            <span class="locked-hint">Сдайте все тесты на проходной балл, чтобы завершить урок</span>
+            {% if not quizzes_ok %}
+                <span class="locked-hint">Сдайте все тесты на проходной балл</span>
+            {% endif %}
+            {% if not tasks_ok %}
+                <span class="locked-hint">Дождитесь проверки всех практических работ</span>
+            {% endif %}
         {% endif %}
     {% else %}
         <span class="lesson-done-label">Урок пройден ✓</span>

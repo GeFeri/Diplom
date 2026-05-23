@@ -19,6 +19,9 @@
     <div class="action-group">
         <a href="{% url 'courses:lesson_detail' lesson.slug %}" class="btn btn-outline" target="_blank">Просмотр</a>
         <a href="{% url 'courses:lesson_edit' lesson.pk %}" class="btn btn-primary">Редактировать</a>
+        {% if lesson.practical_tasks.all %}
+            <a href="{% url 'courses:lesson_submissions' lesson.pk %}" class="btn btn-outline">Работы студентов</a>
+        {% endif %}
     </div>
 </div>
 

@@ -4,6 +4,44 @@ from django.db import models
 from courses.models import Lesson
 
 
+class TaskSubmission(models.Model):
+    class Status(models.TextChoices):
+        PENDING  = 'pending',  'На проверке'
+        ACCEPTED = 'accepted', 'Зачтено'
+        REJECTED = 'rejected', 'На доработку'
+
+    task = models.ForeignKey(
+        'courses.PracticalTask', on_delete=models.CASCADE,
+        related_name='submissions', verbose_name='Задание',
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='task_submissions', verbose_name='Студент',
+    )
+    file = models.FileField('Файл', upload_to='submissions/%Y/%m/')
+    status = models.CharField(
+        'Статус', max_length=20,
+        choices=Status.choices, default=Status.PENDING,
+    )
+    comment = models.TextField('Комментарий преподавателя', blank=True)
+    submitted_at = models.DateTimeField('Дата отправки', auto_now=True)
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='reviewed_submissions', verbose_name='Проверил',
+    )
+    reviewed_at = models.DateTimeField('Дата проверки', null=True, blank=True)
+
+    class Meta:
+        unique_together = ('task', 'user')
+        verbose_name = 'Работа студента'
+        verbose_name_plural = 'Работы студентов'
+        ordering = ['-submitted_at']
+
+    def __str__(self):
+        return f'{self.user.username} — {self.task.title} ({self.get_status_display()})'
+
+
 class UserLessonProgress(models.Model):
     class Status(models.TextChoices):
         NOT_STARTED = 'not_started', 'Не начат'

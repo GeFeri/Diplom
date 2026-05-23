@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Работы студентов — {{ lesson.title }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{% url 'courses:teacher_dashboard' %}">Панель преподавателя</a> /
+    <a href="{% url 'courses:lesson_manage' lesson.pk %}">{{ lesson.title }}</a> /
+    Работы студентов
+</div>
+
+<div class="page-header">
+    <h1>Работы студентов</h1>
+    <span class="meta">Урок: {{ lesson.title }}</span>
+</div>
+
+{% if submissions %}
+    <div class="invite-table-wrap">
+        <table class="progress-table">
+            <thead>
+                <tr>
+                    <th>Студент</th>
+                    <th>Задание</th>
+                    <th>Файл</th>
+                    <th>Отправлено</th>
+                    <th>Статус</th>
+                    <th>Оценка</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in submissions %}
+                    <tr>
+                        <td>{{ sub.user.get_full_name }}</td>
+                        <td>{{ sub.task.title }}</td>
+                        <td>
+                            <a href="{{ sub.file.url }}" target="_blank" class="btn btn-outline btn-sm">
+                                Скачать
+                            </a>
+                        </td>
+                        <td>{{ sub.submitted_at|date:"d.m.Y H:i" }}</td>
+                        <td>
+                            <span class="status-badge
+                                {% if sub.status == 'accepted' %}status-badge--completed
+                                {% elif sub.status == 'rejected' %}status-badge--not_started
+                                {% else %}status-badge--in_progress{% endif %}">
+                                {{ sub.get_status_display }}
+                            </span>
+                            {% if sub.comment %}
+                                <p class="submission-comment">{{ sub.comment }}</p>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if sub.status != 'accepted' %}
+                                <form method="post" action="{% url 'courses:grade_submission' sub.pk %}" class="grade-form">
+                                    {% csrf_token %}
+                                    <select name="status" class="grade-select">
+                                        <option value="accepted">Зачтено</option>
+                                        <option value="rejected">На доработку</option>
+                                    </select>
+                                    <textarea name="comment" rows="2" placeholder="Комментарий (необязательно)" class="grade-comment">{% if sub.comment %}{{ sub.comment }}{% endif %}</textarea>
+                                    <button type="submit" class="btn btn-primary btn-sm">Выставить</button>
+                                </form>
+                            {% else %}
+                                <span class="text-muted">Зачтено</span>
+                                {% if sub.reviewed_by %}
+                                    <br><small>{{ sub.reviewed_by.get_full_name }}</small>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="empty-state">
+        <p>Работ пока нет. Студенты ещё не сдавали задания по этому уроку.</p>
+    </div>
+{% endif %}
+
+<div class="lesson-nav">
+    <a href="{% url 'courses:lesson_manage' lesson.pk %}" class="btn btn-outline">← Назад к уроку</a>
+</div>
+{% endblock %}

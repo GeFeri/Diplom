@@ -38,6 +38,11 @@ urlpatterns = [
     path('teacher/tasks/<int:task_id>/edit/', views.task_edit, name='task_edit'),
     path('teacher/tasks/<int:task_id>/delete/', views.task_delete, name='task_delete'),
 
+    # Практические работы студентов
+    path('lessons/<slug:slug>/tasks/<int:task_id>/submit/', views.task_submit, name='task_submit'),
+    path('teacher/lessons/<int:lesson_id>/submissions/', views.lesson_submissions, name='lesson_submissions'),
+    path('teacher/submissions/<int:submission_id>/grade/', views.grade_submission_view, name='grade_submission'),
+
     # Менеджер — назначения преподавателей
     path('manager/assignments/', views.section_assignments, name='section_assignments'),
 

@@ -4,8 +4,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from courses.models import Section, Lesson, CodeExample, PracticalTask, StudentGroup, TARIFF_LEVEL
 from courses.services import course_service, teacher_service
-from courses.forms import SectionForm, LessonForm, CodeExampleForm, PracticalTaskForm, StudentGroupForm
-from progress.models import UserLessonProgress
+from courses.forms import (
+    SectionForm, LessonForm, CodeExampleForm, PracticalTaskForm,
+    StudentGroupForm, TaskSubmissionForm, GradeSubmissionForm,
+)
+from progress.models import UserLessonProgress, TaskSubmission
 from progress.services import progress_service
 from quizzes.services.quiz_service import all_quizzes_passed, get_quiz_statuses
 from users.decorators import teacher_required, manager_required
@@ -53,12 +56,20 @@ def lesson_detail(request, slug):
     is_completed = lesson_progress and lesson_progress.status == UserLessonProgress.Status.COMPLETED
     quizzes_ok = all_quizzes_passed(request.user, lesson)
     passed_quiz_ids = {qid for qid, ok in get_quiz_statuses(request.user, lesson).items() if ok}
+    submission_map = {
+        s.task_id: s for s in
+        TaskSubmission.objects.filter(user=request.user, task__lesson=lesson)
+    }
+    tasks_ok = progress_service.all_tasks_accepted(request.user, lesson)
 
     return render(request, 'courses/lesson_detail.html', {
         'lesson': lesson,
         'is_completed': is_completed,
         'quizzes_ok': quizzes_ok,
         'passed_quiz_ids': passed_quiz_ids,
+        'submission_map': submission_map,
+        'tasks_ok': tasks_ok,
+        'submission_form': TaskSubmissionForm(),
     })
 
 
@@ -71,6 +82,9 @@ def lesson_complete(request, slug):
         return redirect('courses:section_list')
     if not all_quizzes_passed(request.user, lesson):
         messages.error(request, 'Сначала пройдите все тесты урока на проходной балл.')
+        return redirect('courses:lesson_detail', slug=slug)
+    if not progress_service.all_tasks_accepted(request.user, lesson):
+        messages.error(request, 'Сначала сдайте все практические работы на проверку.')
         return redirect('courses:lesson_detail', slug=slug)
     progress_service.mark_lesson_completed(request.user, lesson)
     messages.success(request, f'Урок «{lesson.title}» отмечен как пройденный.')
@@ -279,6 +293,51 @@ def task_delete(request, task_id):
     return render(request, 'teacher/confirm_delete.html', {
         'object': task, 'back_lesson_id': lesson_id,
     })
+
+
+@login_required
+def task_submit(request, task_id):
+    task = get_object_or_404(PracticalTask, pk=task_id)
+    if request.method == 'POST':
+        form = TaskSubmissionForm(request.POST, request.FILES)
+        if form.is_valid():
+            progress_service.submit_task(request.user, task, form.cleaned_data['file'])
+            messages.success(request, 'Работа отправлена на проверку.')
+        else:
+            messages.error(request, 'Выберите файл для отправки.')
+    return redirect('courses:lesson_detail', slug=task.lesson.slug)
+
+
+@teacher_required
+def lesson_submissions(request, lesson_id):
+    lesson = get_object_or_404(Lesson, pk=lesson_id)
+    submissions = (
+        TaskSubmission.objects
+        .filter(task__lesson=lesson)
+        .select_related('user', 'task')
+        .order_by('task__order', '-submitted_at')
+    )
+    return render(request, 'teacher/submissions_list.html', {
+        'lesson': lesson,
+        'submissions': submissions,
+        'grade_form': GradeSubmissionForm(),
+    })
+
+
+@teacher_required
+def grade_submission_view(request, submission_id):
+    submission = get_object_or_404(TaskSubmission, pk=submission_id)
+    if request.method == 'POST':
+        form = GradeSubmissionForm(request.POST)
+        if form.is_valid():
+            progress_service.grade_submission(
+                submission,
+                request.user,
+                form.cleaned_data['status'],
+                form.cleaned_data['comment'],
+            )
+            messages.success(request, 'Оценка выставлена.')
+    return redirect('courses:lesson_submissions', lesson_id=submission.task.lesson_id)
 
 
 @manager_required

@@ -1252,3 +1252,43 @@ a:hover { text-decoration: underline; }
     .assignment-option { padding: 8px 10px; }
     .assignment-name { font-size: .85rem; }
 }
+
+/* ============================================================
+   ПРАКТИЧЕСКИЕ РАБОТЫ — СДАЧА И ПРОВЕРКА
+   ============================================================ */
+
+.submission-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: var(--bg);
+    border-radius: 8px;
+    border: 1px dashed var(--border);
+}
+.submission-form label { font-size: .875rem; color: var(--text-secondary); white-space: nowrap; }
+.submission-form input[type="file"] { font-size: .875rem; flex: 1; min-width: 0; }
+
+.submission-status {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: .9rem;
+}
+.submission-status--pending  { background: var(--warning-light); border-left: 4px solid var(--warning); }
+.submission-status--accepted { background: var(--success-light); border-left: 4px solid var(--success); }
+.submission-status--rejected { background: var(--danger-light);  border-left: 4px solid var(--danger); }
+.submission-comment { margin-top: 6px; font-size: .85rem; color: var(--text-secondary); }
+
+.grade-form { display: flex; flex-direction: column; gap: 6px; min-width: 220px; }
+.grade-select { padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: .875rem; }
+.grade-comment {
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: .875rem;
+    resize: vertical;
+    font-family: inherit;
+}

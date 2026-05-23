@@ -42,6 +42,22 @@ class PracticalTaskForm(forms.ModelForm):
         }
 
 
+class TaskSubmissionForm(forms.Form):
+    file = forms.FileField(label='Файл с работой')
+
+
+class GradeSubmissionForm(forms.Form):
+    status = forms.ChoiceField(
+        label='Результат',
+        choices=[('accepted', 'Зачтено'), ('rejected', 'На доработку')],
+    )
+    comment = forms.CharField(
+        label='Комментарий',
+        widget=forms.Textarea(attrs={'rows': 3}),
+        required=False,
+    )
+
+
 class StudentGroupForm(forms.ModelForm):
     class Meta:
         model = StudentGroup
