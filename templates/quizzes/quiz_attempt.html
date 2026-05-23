@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ attempt.quiz.title }} — Прохождение{% endblock %}
+
+{% block content %}
+<div class="quiz-attempt">
+    <h1>{{ attempt.quiz.title }}</h1>
+    <p class="quiz-meta">Вопросов: {{ questions|length }}</p>
+
+    <form method="post" class="quiz-form">
+        {% csrf_token %}
+        {% for question in questions %}
+            <div class="question-block" id="question-{{ question.pk }}">
+                <p class="question-text">
+                    <span class="question-num">{{ forloop.counter }}.</span>
+                    {{ question.text }}
+                </p>
+                <ul class="options-list">
+                    {% for option in question.options.all %}
+                        <li class="option-item">
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="question_{{ question.pk }}"
+                                    value="{{ option.pk }}"
+                                    required
+                                >
+                                {{ option.text }}
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+
+        <div class="quiz-submit">
+            <button type="submit" class="btn btn-primary btn-lg">Завершить тест</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Редактировать студента{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{% url 'courses:manager_dashboard' %}">Панель менеджера</a> /
+    <a href="{% url 'courses:manager_student_list' %}">Студенты</a> /
+    {{ student.get_full_name }}
+</div>
+
+<div class="form-page">
+    <h1>{{ student.get_full_name }}</h1>
+    <p class="subtitle">Логин: <code>{{ student.username }}</code></p>
+
+    <form method="post" class="content-form">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <ul class="field-errors">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <a href="{% url 'courses:manager_student_list' %}" class="btn btn-outline">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

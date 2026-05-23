@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h1>Регистрация</h1>
+        <p class="subtitle">Ваши данные уже внесены преподавателем. Придумайте пароль.</p>
+
+        <div class="invite-info">
+            <div class="invite-info__row">
+                <span class="invite-info__label">ФИО:</span>
+                <span>{{ invite.last_name }} {{ invite.first_name }} {{ invite.middle_name }}</span>
+            </div>
+            <div class="invite-info__row">
+                <span class="invite-info__label">Логин:</span>
+                <code>{{ invite.username }}</code>
+            </div>
+        </div>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <ul class="field-errors">
+                            {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            {% if form.non_field_errors %}
+                <ul class="field-errors">
+                    {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+                </ul>
+            {% endif %}
+            <button type="submit" class="btn btn-primary btn-block">Зарегистрироваться</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

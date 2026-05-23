@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Подтверждение удаления{% endblock %}
+
+{% block content %}
+<div class="confirm-delete">
+    <h1>Удалить объект?</h1>
+    <p class="confirm-text">Вы действительно хотите удалить <strong>«{{ object }}»</strong>?</p>
+    <p class="confirm-warning">Это действие необратимо.</p>
+
+    <form method="post" class="confirm-form">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Да, удалить</button>
+        {% if back_lesson_id %}
+            <a href="{% url 'courses:lesson_manage' back_lesson_id %}" class="btn btn-outline">Отмена</a>
+        {% else %}
+            <a href="{% url 'courses:teacher_dashboard' %}" class="btn btn-outline">Отмена</a>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

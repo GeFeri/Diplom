@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Выбор группы — Python{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Выберите группу</h1>
+    <p class="subtitle">Группа определяет набор доступных разделов курса. Вы можете сменить группу в любой момент, если ваш тариф позволяет.</p>
+</div>
+
+<div class="tariff-info">
+    <span>Ваш тариф: <strong>{{ request.user.get_tariff_display }}</strong></span>
+    {% if request.user.group %}
+        <span class="text-muted"> · Текущая группа: <strong>{{ request.user.group.name }}</strong></span>
+    {% endif %}
+</div>
+
+{% if groups %}
+    <div class="card-grid">
+        {% for group in groups %}
+            <div class="card {% if not group.is_eligible %}card--locked{% endif %}">
+                <div class="card-body">
+                    <div class="section-card-header">
+                        <h2 class="card-title">{{ group.name }}</h2>
+                        {% if group.is_eligible %}
+                            {% if request.user.group.pk == group.pk %}
+                                <span class="done-icon" title="Текущая группа">✓</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="lock-icon" title="Требуется более высокий тариф">🔒</span>
+                        {% endif %}
+                    </div>
+
+                    {% if group.description %}
+                        <p class="card-text">{{ group.description }}</p>
+                    {% endif %}
+
+                    <div class="card-meta">
+                        Разделов: {{ group.sections.count }} &nbsp;·&nbsp;
+                        Требуется тариф: <strong>{{ group.get_required_tariff_display }}</strong>
+                    </div>
+
+                    {% if not group.is_eligible %}
+                        <p class="locked-hint">Для вступления необходим тариф «{{ group.get_required_tariff_display }}» или выше</p>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    {% if group.is_eligible %}
+                        {% if request.user.group.pk == group.pk %}
+                            <span class="lesson-done-label">Текущая группа ✓</span>
+                        {% else %}
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="group_id" value="{{ group.pk }}">
+                                <button type="submit" class="btn btn-primary">Вступить в группу</button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        <button class="btn btn-outline" disabled>Недоступно</button>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <p>Групп пока нет. Обратитесь к преподавателю.</p>
+    </div>
+{% endif %}
+{% endblock %}

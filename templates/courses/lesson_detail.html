@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ lesson.title }} — Python{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{% url 'courses:section_list' %}">Разделы</a> /
+    <a href="{% url 'courses:section_detail' lesson.section.pk %}">{{ lesson.section.title }}</a> /
+    {{ lesson.title }}
+</div>
+
+<article class="lesson">
+    <div class="lesson-title-row">
+        <h1>{{ lesson.title }}</h1>
+        {% if is_completed %}
+            <span class="badge badge--green">✓ Пройден</span>
+        {% endif %}
+    </div>
+
+    <div class="lesson-content">
+        {{ lesson.content|linebreaks }}
+    </div>
+
+    {% if lesson.code_examples.all %}
+        <section class="lesson-section">
+            <h2>Примеры кода</h2>
+            {% for example in lesson.code_examples.all %}
+                <div class="code-block">
+                    <h3>{{ example.title }}</h3>
+                    {% if example.explanation %}
+                        <p>{{ example.explanation }}</p>
+                    {% endif %}
+                    <pre><code>{{ example.code }}</code></pre>
+                </div>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    {% if lesson.practical_tasks.all %}
+        <section class="lesson-section">
+            <h2>Практические задания</h2>
+            {% for task in lesson.practical_tasks.all %}
+                <div class="task-block">
+                    <h3>{{ task.title }}</h3>
+                    <p>{{ task.description }}</p>
+                    {% if task.hint %}
+                        <details class="task-hint">
+                            <summary>Подсказка</summary>
+                            <p>{{ task.hint }}</p>
+                        </details>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    {% if lesson.quizzes.all %}
+        <section class="lesson-section">
+            <h2>Проверочные тесты</h2>
+            {% for quiz in lesson.quizzes.all %}
+                {% if quiz.is_active %}
+                    {% if quiz.pk in passed_quiz_ids %}
+                        <div class="quiz-card quiz-card--passed">
+                            <div>
+                                <strong>{{ quiz.title }}</strong>
+                                <span class="badge badge--green" style="margin-left:8px;">✓ Сдан</span>
+                                {% if quiz.description %}<p>{{ quiz.description }}</p>{% endif %}
+                                <small>Проходной балл: {{ quiz.passing_score }}%</small>
+                            </div>
+                            <a href="{% url 'quizzes:quiz_start' quiz.pk %}" class="btn btn-outline">Пройти ещё раз</a>
+                        </div>
+                    {% else %}
+                        <div class="quiz-card">
+                            <div>
+                                <strong>{{ quiz.title }}</strong>
+                                <span class="badge badge--gray" style="margin-left:8px;">Не сдан</span>
+                                {% if quiz.description %}<p>{{ quiz.description }}</p>{% endif %}
+                                <small>Проходной балл: {{ quiz.passing_score }}%</small>
+                            </div>
+                            <a href="{% url 'quizzes:quiz_start' quiz.pk %}" class="btn btn-primary">Пройти тест</a>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </section>
+    {% endif %}
+</article>
+
+<div class="lesson-nav">
+    <a href="{% url 'courses:section_detail' lesson.section.pk %}" class="btn btn-outline">
+        ← Вернуться к разделу
+    </a>
+    {% if not is_completed %}
+        {% if quizzes_ok %}
+            <form method="post" action="{% url 'courses:lesson_complete' lesson.slug %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Отметить урок как пройденный ✓</button>
+            </form>
+        {% else %}
+            <span class="btn btn-success" style="opacity:.4;cursor:not-allowed;" title="Сначала сдайте все тесты">
+                Отметить урок как пройденный ✓
+            </span>
+            <span class="locked-hint">Сдайте все тесты на проходной балл, чтобы завершить урок</span>
+        {% endif %}
+    {% else %}
+        <span class="lesson-done-label">Урок пройден ✓</span>
+    {% endif %}
+</div>
+{% endblock %}

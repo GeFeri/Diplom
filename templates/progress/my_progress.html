@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Мой прогресс — Python{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Мой прогресс</h1>
+</div>
+
+<div class="progress-summary">
+    <div class="progress-bar-container">
+        <div class="progress-bar" style="width: {{ percent }}%"></div>
+    </div>
+    <p class="progress-text">
+        Завершено уроков: <strong>{{ completed }}</strong> из <strong>{{ total }}</strong>
+        ({{ percent }}%)
+    </p>
+</div>
+
+{% if progress_list %}
+    {% regroup progress_list by lesson.section as sections %}
+    {% for section_group in sections %}
+        <div class="progress-section">
+            <h2>{{ section_group.grouper.title }}</h2>
+            <table class="progress-table">
+                <thead>
+                    <tr>
+                        <th>Урок</th>
+                        <th>Статус</th>
+                        <th>Балл</th>
+                        <th>Завершён</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for progress in section_group.list %}
+                        <tr class="status-{{ progress.status }}">
+                            <td>
+                                <a href="{% url 'courses:lesson_detail' progress.lesson.slug %}">
+                                    {{ progress.lesson.title }}
+                                </a>
+                            </td>
+                            <td>
+                                <span class="status-badge status-badge--{{ progress.status }}">
+                                    {{ progress.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if progress.score is not None %}
+                                    {{ progress.score|floatformat:0 }}%
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if progress.completed_at %}
+                                    {{ progress.completed_at|date:"d.m.Y" }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="empty-state">
+        <p>Вы ещё не начали ни одного урока.</p>
+        <a href="{% url 'courses:section_list' %}" class="btn btn-primary">Начать обучение</a>
+    </div>
+{% endif %}
+{% endblock %}

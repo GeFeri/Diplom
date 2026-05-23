@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Панель преподавателя{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Панель преподавателя</h1>
+    <a href="{% url 'courses:section_create' %}" class="btn btn-primary">+ Новый раздел</a>
+</div>
+
+<div class="stats-bar">
+    <div class="stat-item">
+        <span class="stat-value">{{ total_sections }}</span>
+        <span class="stat-label">Разделов</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-value">{{ total_lessons }}</span>
+        <span class="stat-label">Уроков</span>
+    </div>
+</div>
+
+{% if sections %}
+    <div class="teacher-sections">
+        {% for section in sections %}
+            <div class="teacher-section-card">
+                <div class="teacher-section-card__header">
+                    <div>
+                        <h2>{{ section.title }}</h2>
+                        <span class="badge {% if section.is_published %}badge--green{% else %}badge--gray{% endif %}">
+                            {% if section.is_published %}Опубликован{% else %}Черновик{% endif %}
+                        </span>
+                        <span class="meta">Уроков: {{ section.lesson_count }}</span>
+                    </div>
+                    <div class="action-group">
+                        {% if section.pk in editable_ids %}
+                            <a href="{% url 'courses:lesson_create' section.pk %}" class="btn btn-primary btn-sm">+ Урок</a>
+                            <a href="{% url 'courses:section_edit' section.pk %}" class="btn btn-outline btn-sm">Изменить</a>
+                            <a href="{% url 'courses:section_delete' section.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+                        {% else %}
+                            <span class="badge badge--gray">Только просмотр</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% with lessons=section.lessons.all %}
+                    {% if lessons %}
+                        <ul class="teacher-lesson-list">
+                            {% for lesson in lessons %}
+                                <li class="teacher-lesson-item">
+                                    <span class="lesson-title">{{ lesson.title }}</span>
+                                    <span class="badge {% if lesson.is_published %}badge--green{% else %}badge--gray{% endif %} badge--sm">
+                                        {% if lesson.is_published %}Опубликован{% else %}Черновик{% endif %}
+                                    </span>
+                                    <div class="action-group action-group--sm">
+                                        <a href="{% url 'courses:lesson_manage' lesson.pk %}">Управление</a>
+                                        {% if section.pk in editable_ids %}
+                                            <a href="{% url 'courses:lesson_edit' lesson.pk %}">Изменить</a>
+                                            <a href="{% url 'courses:lesson_delete' lesson.pk %}" class="text-danger">Удалить</a>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="no-lessons">Уроков пока нет. <a href="{% url 'courses:lesson_create' section.pk %}">Добавить первый</a></p>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <p>Разделов пока нет.</p>
+        <a href="{% url 'courses:section_create' %}" class="btn btn-primary">Создать первый раздел</a>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Результат теста — {{ attempt.quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="quiz-result">
+    <h1>Результат теста</h1>
+    <h2>{{ attempt.quiz.title }}</h2>
+
+    <div class="result-badge {% if attempt.is_passed %}result-badge--pass{% else %}result-badge--fail{% endif %}">
+        {% if attempt.is_passed %}
+            ✓ Тест пройден!
+        {% else %}
+            ✗ Тест не пройден
+        {% endif %}
+    </div>
+
+    <div class="result-score">
+        <span class="score-value">{{ attempt.score|floatformat:0 }}%</span>
+        <span class="score-label">из {{ attempt.quiz.passing_score }}% необходимых</span>
+    </div>
+
+    <div class="result-details">
+        <h3>Ваши ответы</h3>
+        {% for answer in attempt.answers.all %}
+            <div class="answer-row {% if answer.selected_option.is_correct %}answer-row--correct{% else %}answer-row--wrong{% endif %}">
+                <p class="answer-question">{{ forloop.counter }}. {{ answer.question.text }}</p>
+                <p class="answer-chosen">
+                    Ваш ответ: <strong>{{ answer.selected_option.text }}</strong>
+                    {% if answer.selected_option.is_correct %}
+                        <span class="tag tag--green">✓ Верно</span>
+                    {% else %}
+                        <span class="tag tag--red">✗ Неверно</span>
+                    {% endif %}
+                </p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="result-actions">
+        <a href="{% url 'quizzes:quiz_start' attempt.quiz.pk %}" class="btn btn-primary">
+            Пройти снова
+        </a>
+        <a href="{% url 'courses:lesson_detail' attempt.quiz.lesson.slug %}" class="btn btn-outline">
+            ← Вернуться к уроку
+        </a>
+        <a href="{% url 'progress:my_progress' %}" class="btn btn-outline">
+            Мой прогресс
+        </a>
+    </div>
+</div>
+{% endblock %}

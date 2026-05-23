@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Учебное пособие по Python{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="{% url 'courses:section_list' %}" class="logo">Python — Учебное пособие</a>
+            <nav class="nav">
+                <a href="{% url 'courses:section_list' %}">Разделы</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'progress:my_progress' %}">Мой прогресс</a>
+                    {% if user.role == 'teacher' or user.role == 'admin' or user.is_superuser %}
+                        <a href="{% url 'courses:teacher_dashboard' %}" class="nav-teacher">Панель преподавателя</a>
+                    {% endif %}
+                    {% if user.role == 'manager' or user.role == 'admin' or user.is_superuser %}
+                        <a href="{% url 'courses:manager_dashboard' %}" class="nav-manager">Панель менеджера</a>
+                    {% endif %}
+                    <a href="{% url 'users:profile' %}">{{ user.username }}</a>
+                    <a href="{% url 'users:logout' %}" class="btn btn-outline">Выйти</a>
+                {% else %}
+                    <a href="{% url 'users:login' %}" class="btn btn-primary">Войти</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="message message--{{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>Электронное учебно-методическое пособие по Python</p>
+        </div>
+    </footer>
+</body>
+</html>

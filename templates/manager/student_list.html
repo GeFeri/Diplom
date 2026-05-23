@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Студенты{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{% url 'courses:manager_dashboard' %}">Панель менеджера</a> / Студенты
+</div>
+
+<div class="page-header">
+    <h1>Студенты</h1>
+</div>
+
+{% if students %}
+    <div class="invite-table-wrap">
+        <table class="progress-table">
+            <thead>
+                <tr>
+                    <th>ФИО</th>
+                    <th>Логин</th>
+                    <th>Группа</th>
+                    <th>Тариф</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                    <tr>
+                        <td>{{ student.get_full_name }}</td>
+                        <td><code>{{ student.username }}</code></td>
+                        <td>
+                            {% if student.group %}
+                                {{ student.group.name }}
+                            {% else %}
+                                <span class="text-muted">не назначена</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge badge--gray">{{ student.get_tariff_display }}</span>
+                        </td>
+                        <td>
+                            <a href="{% url 'courses:manager_student_edit' student.pk %}" class="btn btn-outline btn-sm">Изменить</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="empty-state">
+        <p>Студентов пока нет.</p>
+        <a href="{% url 'courses:invite_list' %}" class="btn btn-primary">Создать ссылку для регистрации</a>
+    </div>
+{% endif %}
+{% endblock %}

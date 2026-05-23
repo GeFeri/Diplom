@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Ссылки для регистрации{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{% url 'courses:manager_dashboard' %}">Панель менеджера</a> / Ссылки для регистрации
+</div>
+
+<div class="page-header">
+    <h1>Ссылки для регистрации</h1>
+    <a href="{% url 'courses:invite_create' %}" class="btn btn-primary">+ Создать ссылку</a>
+</div>
+
+{% if invites %}
+    <div class="invite-table-wrap">
+        <table class="progress-table">
+            <thead>
+                <tr>
+                    <th>ФИО</th>
+                    <th>Логин</th>
+                    <th>Ссылка для регистрации</th>
+                    <th>Статус</th>
+                    <th>Создана</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invite in invites %}
+                    <tr>
+                        <td>{{ invite.last_name }} {{ invite.first_name }} {{ invite.middle_name }}</td>
+                        <td><code>{{ invite.username }}</code></td>
+                        <td>
+                            {% if not invite.is_used %}
+                                <div class="invite-link-row">
+                                    <input type="text" class="invite-link-input"
+                                        value="{{ request.scheme }}://{{ request.get_host }}{% url 'users:register_via_token' invite.token %}"
+                                        readonly id="link-{{ invite.pk }}">
+                                    <button class="btn btn-outline btn-sm" onclick="copyLink('link-{{ invite.pk }}')">Копировать</button>
+                                </div>
+                            {% else %}
+                                <span class="text-muted">использована</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-badge {% if invite.is_used %}status-badge--completed{% else %}status-badge--in_progress{% endif %}">
+                                {% if invite.is_used %}Использована{% else %}Активна{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ invite.created_at|date:"d.m.Y H:i" }}</td>
+                        <td>
+                            {% if not invite.is_used %}
+                                <a href="{% url 'courses:invite_delete' invite.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="empty-state">
+        <p>Ссылок пока нет.</p>
+        <a href="{% url 'courses:invite_create' %}" class="btn btn-primary">Создать первую ссылку</a>
+    </div>
+{% endif %}
+
+<script>
+function copyLink(inputId) {
+    const input = document.getElementById(inputId);
+    input.select();
+    document.execCommand('copy');
+    const btn = input.nextElementSibling;
+    btn.textContent = 'Скопировано!';
+    setTimeout(() => btn.textContent = 'Копировать', 2000);
+}
+</script>
+{% endblock %}

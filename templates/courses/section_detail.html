@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ section.title }} — Python{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{% url 'courses:section_list' %}">Разделы</a> / {{ section.title }}
+</div>
+
+<div class="page-header">
+    <h1>{{ section.title }}</h1>
+    {% if section.description %}
+        <p class="subtitle">{{ section.description }}</p>
+    {% endif %}
+</div>
+
+{% with lessons=section.lessons.all %}
+    {% if lessons %}
+        <div class="lesson-list">
+            {% for lesson in lessons %}
+                {% if lesson.is_published %}
+                    <div class="lesson-item {% if lesson.pk in completed_ids %}lesson-item--done{% endif %}">
+                        <div class="lesson-item__number">
+                            {% if lesson.pk in completed_ids %}
+                                <span class="lesson-check">✓</span>
+                            {% else %}
+                                {{ forloop.counter }}
+                            {% endif %}
+                        </div>
+                        <div class="lesson-item__body">
+                            <h3>
+                                <a href="{% url 'courses:lesson_detail' lesson.slug %}">{{ lesson.title }}</a>
+                            </h3>
+                            <div class="lesson-item__meta">
+                                Примеров кода: {{ lesson.code_examples.count }} &nbsp;·&nbsp;
+                                Заданий: {{ lesson.practical_tasks.count }}
+                                {% if lesson.pk in completed_ids %}
+                                    &nbsp;·&nbsp; <span class="text-success">Пройден</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <a href="{% url 'courses:lesson_detail' lesson.slug %}" class="btn {% if lesson.pk in completed_ids %}btn-outline{% else %}btn-primary{% endif %}">
+                            {% if lesson.pk in completed_ids %}Повторить{% else %}Изучить{% endif %}
+                        </a>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>В этом разделе пока нет уроков.</p>
+        </div>
+    {% endif %}
+{% endwith %}
+{% endblock %}

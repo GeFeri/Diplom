@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Группы студентов{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{% url 'courses:teacher_dashboard' %}">Панель преподавателя</a> / Группы
+</div>
+
+<div class="page-header">
+    <h1>Группы студентов</h1>
+    <a href="{% url 'courses:group_create' %}" class="btn btn-primary">+ Создать группу</a>
+</div>
+
+{% if groups %}
+    <div class="teacher-sections">
+        {% for group in groups %}
+            <div class="teacher-section-card">
+                <div class="teacher-section-card__header">
+                    <div>
+                        <h2>{{ group.name }}</h2>
+                        <span class="badge badge--gray">{{ group.get_required_tariff_display }}</span>
+                        <span class="meta">Студентов: {{ group.student_count }} &nbsp;·&nbsp; Разделов: {{ group.sections.count }}</span>
+                        {% if group.description %}
+                            <p class="text-muted" style="margin-top:4px;">{{ group.description }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="action-group">
+                        <a href="{% url 'courses:group_edit' group.pk %}" class="btn btn-outline btn-sm">Изменить</a>
+                        <a href="{% url 'courses:group_delete' group.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+                    </div>
+                </div>
+
+                {% if group.sections.all %}
+                    <ul class="teacher-lesson-list">
+                        {% for section in group.sections.all %}
+                            <li class="teacher-lesson-item">
+                                <span class="lesson-title">{{ section.title }}</span>
+                                <span class="badge {% if section.is_published %}badge--green{% else %}badge--gray{% endif %} badge--sm">
+                                    {% if section.is_published %}Опубликован{% else %}Черновик{% endif %}
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="no-lessons">Разделы не назначены.</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <p>Групп пока нет.</p>
+        <a href="{% url 'courses:group_create' %}" class="btn btn-primary">Создать первую группу</a>
+    </div>
+{% endif %}
+{% endblock %}

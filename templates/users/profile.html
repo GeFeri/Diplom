@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Профиль — {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="profile">
+    <h1>Профиль пользователя</h1>
+
+    <div class="profile-card">
+        <div class="profile-field">
+            <span class="profile-label">Логин:</span>
+            <span>{{ user.username }}</span>
+        </div>
+        <div class="profile-field">
+            <span class="profile-label">ФИО:</span>
+            <span>{{ user.get_full_name }}</span>
+        </div>
+        {% if user.email %}
+            <div class="profile-field">
+                <span class="profile-label">Email:</span>
+                <span>{{ user.email }}</span>
+            </div>
+        {% endif %}
+        <div class="profile-field">
+            <span class="profile-label">Роль:</span>
+            <span>{{ user.get_role_display }}</span>
+        </div>
+        <div class="profile-field">
+            <span class="profile-label">Дата регистрации:</span>
+            <span>{{ user.date_joined|date:"d.m.Y" }}</span>
+        </div>
+    </div>
+
+    <div class="profile-actions">
+        <a href="{% url 'progress:my_progress' %}" class="btn btn-primary">Мой прогресс</a>
+        <a href="{% url 'users:logout' %}" class="btn btn-outline">Выйти</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Управление: {{ lesson.title }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{% url 'courses:teacher_dashboard' %}">Панель преподавателя</a> /
+    {{ lesson.section.title }} /
+    {{ lesson.title }}
+</div>
+
+<div class="lesson-manage-header">
+    <div>
+        <h1>{{ lesson.title }}</h1>
+        <span class="badge {% if lesson.is_published %}badge--green{% else %}badge--gray{% endif %}">
+            {% if lesson.is_published %}Опубликован{% else %}Черновик{% endif %}
+        </span>
+    </div>
+    <div class="action-group">
+        <a href="{% url 'courses:lesson_detail' lesson.slug %}" class="btn btn-outline" target="_blank">Просмотр</a>
+        <a href="{% url 'courses:lesson_edit' lesson.pk %}" class="btn btn-primary">Редактировать</a>
+    </div>
+</div>
+
+<!-- Примеры кода -->
+<section class="manage-section">
+    <div class="manage-section__header">
+        <h2>Примеры кода</h2>
+        <a href="{% url 'courses:example_create' lesson.pk %}" class="btn btn-primary btn-sm">+ Добавить</a>
+    </div>
+    {% if lesson.code_examples.all %}
+        <div class="manage-list">
+            {% for example in lesson.code_examples.all %}
+                <div class="manage-item">
+                    <span>{{ example.title }}</span>
+                    <div class="action-group action-group--sm">
+                        <a href="{% url 'courses:example_edit' example.pk %}" class="btn btn-outline btn-sm">Изменить</a>
+                        <a href="{% url 'courses:example_delete' example.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-inline">Примеров кода нет.</p>
+    {% endif %}
+</section>
+
+<!-- Практические задания -->
+<section class="manage-section">
+    <div class="manage-section__header">
+        <h2>Практические задания</h2>
+        <a href="{% url 'courses:task_create' lesson.pk %}" class="btn btn-primary btn-sm">+ Добавить</a>
+    </div>
+    {% if lesson.practical_tasks.all %}
+        <div class="manage-list">
+            {% for task in lesson.practical_tasks.all %}
+                <div class="manage-item">
+                    <span>{{ task.title }}</span>
+                    <div class="action-group action-group--sm">
+                        <a href="{% url 'courses:task_edit' task.pk %}" class="btn btn-outline btn-sm">Изменить</a>
+                        <a href="{% url 'courses:task_delete' task.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-inline">Заданий нет.</p>
+    {% endif %}
+</section>
+
+<!-- Тесты -->
+<section class="manage-section">
+    <div class="manage-section__header">
+        <h2>Тесты</h2>
+        {% if not lesson.quizzes.all %}
+            <a href="{% url 'quizzes:quiz_create' lesson.pk %}" class="btn btn-primary btn-sm">+ Создать тест</a>
+        {% endif %}
+    </div>
+    {% if lesson.quizzes.all %}
+        {% for quiz in lesson.quizzes.all %}
+            <div class="quiz-manage-card">
+                <div>
+                    <strong>{{ quiz.title }}</strong>
+                    <span class="badge {% if quiz.is_active %}badge--green{% else %}badge--gray{% endif %} badge--sm">
+                        {% if quiz.is_active %}Активен{% else %}Отключён{% endif %}
+                    </span>
+                    <span class="meta">Вопросов: {{ quiz.questions.count }} · Проходной балл: {{ quiz.passing_score }}%</span>
+                </div>
+                <div class="action-group action-group--sm">
+                    <a href="{% url 'quizzes:question_create' quiz.pk %}" class="btn btn-primary btn-sm">+ Вопрос</a>
+                    <a href="{% url 'quizzes:quiz_edit' quiz.pk %}" class="btn btn-outline btn-sm">Изменить</a>
+                    <a href="{% url 'quizzes:quiz_delete' quiz.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+                </div>
+
+                {% if quiz.questions.all %}
+                    <div class="manage-list manage-list--nested">
+                        {% for question in quiz.questions.all %}
+                            <div class="manage-item">
+                                <span>{{ forloop.counter }}. {{ question.text|truncatechars:80 }}</span>
+                                <div class="action-group action-group--sm">
+                                    <a href="{% url 'quizzes:question_edit' question.pk %}" class="btn btn-outline btn-sm">Изменить</a>
+                                    <a href="{% url 'quizzes:question_delete' question.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="empty-inline">Тестов нет.</p>
+    {% endif %}
+</section>
+
+<div class="lesson-nav">
+    <a href="{% url 'courses:teacher_dashboard' %}" class="btn btn-outline">← Панель преподавателя</a>
+    <a href="{% url 'courses:lesson_delete' lesson.pk %}" class="btn btn-danger">Удалить урок</a>
+</div>
+{% endblock %}

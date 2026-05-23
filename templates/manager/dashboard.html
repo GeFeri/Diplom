@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Панель менеджера{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Панель менеджера</h1>
+</div>
+
+<div class="stats-bar">
+    <div class="stat-item">
+        <span class="stat-value">{{ total_students }}</span>
+        <span class="stat-label">Студентов</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-value">{{ students_without_group }}</span>
+        <span class="stat-label">Без группы</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-value">{{ active_invites }}</span>
+        <span class="stat-label">Активных ссылок</span>
+    </div>
+    <div class="stat-item stat-item--action">
+        <a href="{% url 'courses:manager_student_list' %}" class="btn btn-primary">Студенты →</a>
+    </div>
+    <div class="stat-item stat-item--action">
+        <a href="{% url 'courses:section_assignments' %}" class="btn btn-outline">Назначения →</a>
+    </div>
+    <div class="stat-item stat-item--action">
+        <a href="{% url 'courses:group_list' %}" class="btn btn-outline">Группы →</a>
+    </div>
+    <div class="stat-item stat-item--action">
+        <a href="{% url 'courses:invite_list' %}" class="btn btn-outline">Ссылки →</a>
+    </div>
+</div>
+{% endblock %}

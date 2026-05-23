@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Разделы курса — Python{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Учебные разделы</h1>
+    <p class="subtitle">Проходите разделы последовательно — каждый следующий открывается после 100% прохождения предыдущего</p>
+</div>
+
+{% if sections %}
+    <div class="card-grid">
+        {% for section in sections %}
+            <div class="card {% if not section.is_unlocked %}card--locked{% endif %}">
+                <div class="card-body">
+                    <div class="section-card-header">
+                        <h2 class="card-title">
+                            {% if section.is_unlocked %}
+                                <a href="{% url 'courses:section_detail' section.pk %}">{{ section.title }}</a>
+                            {% else %}
+                                {{ section.title }}
+                            {% endif %}
+                        </h2>
+                        {% if not section.is_unlocked %}
+                            <span class="lock-icon" title="Завершите предыдущий раздел">🔒</span>
+                        {% elif section.completion_percent == 100 %}
+                            <span class="done-icon" title="Раздел пройден">✓</span>
+                        {% endif %}
+                    </div>
+
+                    {% if section.description %}
+                        <p class="card-text">{{ section.description }}</p>
+                    {% endif %}
+
+                    <div class="card-meta">Уроков: {{ section.total_count }}</div>
+
+                    {% if section.is_unlocked %}
+                        <div class="progress-wrap">
+                            <div class="progress-bar">
+                                <div class="progress-bar__fill" style="width: {{ section.completion_percent }}%"></div>
+                            </div>
+                            <span class="progress-label">{{ section.completed_count }} / {{ section.total_count }} пройдено</span>
+                        </div>
+                    {% else %}
+                        <p class="locked-hint">Завершите предыдущий раздел на 100%, чтобы открыть этот</p>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    {% if section.is_unlocked %}
+                        <a href="{% url 'courses:section_detail' section.pk %}" class="btn btn-primary">
+                            {% if section.completion_percent == 100 %}Повторить{% elif section.completion_percent > 0 %}Продолжить{% else %}Начать{% endif %} →
+                        </a>
+                    {% else %}
+                        <button class="btn btn-outline" disabled>Закрыт</button>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <p>Разделы пока не опубликованы.</p>
+    </div>
+{% endif %}
+{% endblock %}

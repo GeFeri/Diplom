@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ quiz.title }} — Тест{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{% url 'courses:section_list' %}">Разделы</a> /
+    <a href="{% url 'courses:lesson_detail' quiz.lesson.slug %}">{{ quiz.lesson.title }}</a> /
+    Тест
+</div>
+
+<div class="quiz-start">
+    <h1>{{ quiz.title }}</h1>
+
+    {% if quiz.description %}
+        <p class="quiz-description">{{ quiz.description }}</p>
+    {% endif %}
+
+    <div class="quiz-info">
+        <div class="quiz-info__item">
+            <span class="label">Вопросов:</span>
+            <strong>{{ quiz.questions.count }}</strong>
+        </div>
+        <div class="quiz-info__item">
+            <span class="label">Проходной балл:</span>
+            <strong>{{ quiz.passing_score }}%</strong>
+        </div>
+        {% if quiz.time_limit %}
+            <div class="quiz-info__item">
+                <span class="label">Ограничение времени:</span>
+                <strong>{{ quiz.time_limit }} мин.</strong>
+            </div>
+        {% endif %}
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary btn-lg">Начать тест →</button>
+    </form>
+
+    <a href="{% url 'courses:lesson_detail' quiz.lesson.slug %}" class="btn btn-outline">
+        ← Вернуться к уроку
+    </a>
+</div>
+{% endblock %}
