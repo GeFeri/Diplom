@@ -1,3 +1,5 @@
+import os
+
 from django import forms
 
 from courses.models import Section, Lesson, CodeExample, PracticalTask, StudentGroup
@@ -44,6 +46,16 @@ class PracticalTaskForm(forms.ModelForm):
 
 class TaskSubmissionForm(forms.Form):
     file = forms.FileField(label='Файл с работой')
+
+    def clean_file(self):
+        f = self.cleaned_data['file']
+        allowed = {'.py', '.txt', '.zip', '.pdf', '.docx', '.doc'}
+        ext = os.path.splitext(f.name)[1].lower()
+        if ext not in allowed:
+            raise forms.ValidationError(
+                'Недопустимый формат. Разрешено: .py .txt .zip .pdf .docx .doc'
+            )
+        return f
 
 
 class GradeSubmissionForm(forms.Form):

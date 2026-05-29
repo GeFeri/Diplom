@@ -23,6 +23,9 @@
                 {% endif %}
             </div>
         {% endfor %}
+        {% if form.non_field_errors %}
+            <ul class="field-errors">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">Сохранить</button>
             <a href="{% url 'courses:group_list' %}" class="btn btn-outline">Отмена</a>

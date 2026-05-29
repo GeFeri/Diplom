@@ -63,7 +63,7 @@
                                 <form method="post" action="{% url 'courses:task_submit' task.pk %}" enctype="multipart/form-data" class="submission-form">
                                     {% csrf_token %}
                                     <label>Загрузить новый файл:</label>
-                                    <input type="file" name="file" required>
+                                    <input type="file" name="file" required onchange="validateSubmitFile(this)">
                                     <button type="submit" class="btn btn-outline btn-sm">Отправить повторно</button>
                                 </form>
                             {% endif %}
@@ -71,7 +71,7 @@
                             <form method="post" action="{% url 'courses:task_submit' task.pk %}" enctype="multipart/form-data" class="submission-form">
                                 {% csrf_token %}
                                 <label>Загрузить файл с работой:</label>
-                                <input type="file" name="file" required>
+                                <input type="file" name="file" required onchange="validateSubmitFile(this)">
                                 <button type="submit" class="btn btn-primary btn-sm">Отправить на проверку</button>
                             </form>
                         {% endif %}
@@ -138,4 +138,16 @@
         <span class="lesson-done-label">Урок пройден ✓</span>
     {% endif %}
 </div>
+<script>
+function validateSubmitFile(input) {
+    var allowed = ['.py', '.txt', '.zip', '.pdf', '.docx', '.doc'];
+    if (!input.files[0]) return;
+    var name = input.files[0].name.toLowerCase();
+    var ok = allowed.some(function(ext) { return name.endsWith(ext); });
+    if (!ok) {
+        alert('Недопустимый формат. Разрешено: .py .txt .zip .pdf .docx .doc');
+        input.value = '';
+    }
+}
+</script>
 {% endblock %}

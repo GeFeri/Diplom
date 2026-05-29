@@ -51,7 +51,7 @@
                         </td>
                         <td>
                             {% if sub.status != 'accepted' %}
-                                <form method="post" action="{% url 'courses:grade_submission' sub.pk %}" class="grade-form">
+                                <form method="post" action="{% url 'courses:grade_submission' sub.pk %}" class="grade-form" onsubmit="return confirm('Выставить оценку?')">
                                     {% csrf_token %}
                                     <select name="status" class="grade-select">
                                         <option value="accepted">Зачтено</option>

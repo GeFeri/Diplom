@@ -96,6 +96,9 @@ def choose_group(request):
     groups = course_service.get_available_groups(request.user)
     if request.method == 'POST':
         group_id = request.POST.get('group_id')
+        if not group_id:
+            messages.error(request, 'Выберите группу.')
+            return render(request, 'courses/choose_group.html', {'groups': groups})
         group = get_object_or_404(StudentGroup, pk=group_id)
         user_level = TARIFF_LEVEL.get(request.user.tariff, 0)
         group_level = TARIFF_LEVEL.get(group.required_tariff, 0)
@@ -337,6 +340,8 @@ def grade_submission_view(request, submission_id):
                 form.cleaned_data['comment'],
             )
             messages.success(request, 'Оценка выставлена.')
+        else:
+            messages.error(request, 'Заполните форму правильно.')
     return redirect('courses:lesson_submissions', lesson_id=submission.task.lesson_id)
 
 

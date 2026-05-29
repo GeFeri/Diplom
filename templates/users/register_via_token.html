@@ -41,4 +41,17 @@
         </form>
     </div>
 </div>
+<script>
+document.querySelector('.auth-form').addEventListener('submit', function(e) {
+    var p1 = document.getElementById('id_password1').value;
+    var p2 = document.getElementById('id_password2').value;
+    if (p1 !== p2) {
+        e.preventDefault();
+        document.getElementById('id_password2').setCustomValidity('Пароли не совпадают');
+        document.getElementById('id_password2').reportValidity();
+    } else {
+        document.getElementById('id_password2').setCustomValidity('');
+    }
+});
+</script>
 {% endblock %}
