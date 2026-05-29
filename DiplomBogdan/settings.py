@@ -6,8 +6,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-2srxg32!nx^$%hv(2snqst5dr#*_w!_g*vl4w$$he8&s3w(gg&')
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost 127.0.0.1').split()
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
+CSRF_TRUSTED_ORIGINS = ['https://gladiator-fest.ru', 'https://www.gladiator-fest.ru']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
