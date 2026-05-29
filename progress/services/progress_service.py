@@ -65,17 +65,62 @@ def all_tasks_accepted(user, lesson):
 
 
 def get_user_progress(user):
-    progress_list = (
-        UserLessonProgress.objects
-        .filter(user=user)
-        .select_related('lesson__section')
-        .order_by('lesson__section__order', 'lesson__order')
-    )
-    total = progress_list.count()
-    completed = progress_list.filter(status=UserLessonProgress.Status.COMPLETED).count()
+    from courses.models import Section
+    from courses.services.course_service import _is_staff, get_sections_with_access
+
+    if _is_staff(user):
+        raw = list(
+            Section.objects.filter(is_published=True)
+            .prefetch_related('lessons')
+            .order_by('order')
+        )
+        for s in raw:
+            s.is_unlocked = True
+        sections = raw
+    elif not user.group_id:
+        return {'sections_data': [], 'total': 0, 'completed': 0, 'percent': 0}
+    else:
+        sections = get_sections_with_access(user) or []
+
+    existing = {
+        p.lesson_id: p
+        for p in UserLessonProgress.objects.filter(user=user)
+    }
+
+    sections_data = []
+    total = 0
+    completed = 0
+
+    for section in sections:
+        published = sorted(
+            [l for l in section.lessons.all() if l.is_published],
+            key=lambda l: l.order,
+        )
+        lesson_rows = []
+        for lesson in published:
+            total += 1
+            prog = existing.get(lesson.pk)
+            if prog and prog.status == UserLessonProgress.Status.COMPLETED:
+                completed += 1
+            lesson_rows.append({
+                'lesson': lesson,
+                'status': prog.status if prog else UserLessonProgress.Status.NOT_STARTED,
+                'status_display': prog.get_status_display() if prog else 'Не начат',
+                'score': prog.score if prog else None,
+                'completed_at': prog.completed_at if prog else None,
+                'is_locked': not section.is_unlocked,
+            })
+
+        if lesson_rows:
+            sections_data.append({
+                'section': section,
+                'is_unlocked': section.is_unlocked,
+                'lessons': lesson_rows,
+            })
+
     percent = round(completed / total * 100) if total > 0 else 0
     return {
-        'progress_list': progress_list,
+        'sections_data': sections_data,
         'total': total,
         'completed': completed,
         'percent': percent,

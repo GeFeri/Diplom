@@ -17,11 +17,15 @@
     </p>
 </div>
 
-{% if progress_list %}
-    {% regroup progress_list by lesson.section as sections %}
-    {% for section_group in sections %}
+{% if sections_data %}
+    {% for sec in sections_data %}
         <div class="progress-section">
-            <h2>{{ section_group.grouper.title }}</h2>
+            <h2>
+                {{ sec.section.title }}
+                {% if not sec.is_unlocked %}
+                    <span class="lock-icon" title="Раздел заблокирован">🔒</span>
+                {% endif %}
+            </h2>
             <table class="progress-table">
                 <thead>
                     <tr>
@@ -32,28 +36,33 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for progress in section_group.list %}
-                        <tr class="status-{{ progress.status }}">
+                    {% for row in sec.lessons %}
+                        <tr class="status-{{ row.status }}">
                             <td>
-                                <a href="{% url 'courses:lesson_detail' progress.lesson.slug %}">
-                                    {{ progress.lesson.title }}
-                                </a>
+                                {% if not row.is_locked %}
+                                    <a href="{% url 'courses:lesson_detail' row.lesson.slug %}">
+                                        {{ row.lesson.title }}
+                                    </a>
+                                {% else %}
+                                    {{ row.lesson.title }}
+                                    <span class="lock-icon" title="Завершите предыдущий раздел">🔒</span>
+                                {% endif %}
                             </td>
                             <td>
-                                <span class="status-badge status-badge--{{ progress.status }}">
-                                    {{ progress.get_status_display }}
+                                <span class="status-badge status-badge--{{ row.status }}">
+                                    {{ row.status_display }}
                                 </span>
                             </td>
                             <td>
-                                {% if progress.score is not None %}
-                                    {{ progress.score|floatformat:0 }}%
+                                {% if row.score is not None %}
+                                    {{ row.score|floatformat:0 }}%
                                 {% else %}
                                     —
                                 {% endif %}
                             </td>
                             <td>
-                                {% if progress.completed_at %}
-                                    {{ progress.completed_at|date:"d.m.Y" }}
+                                {% if row.completed_at %}
+                                    {{ row.completed_at|date:"d.m.Y" }}
                                 {% else %}
                                     —
                                 {% endif %}
