@@ -1,12 +1,13 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-2srxg32!nx^$%hv(2snqst5dr#*_w!_g*vl4w$$he8&s3w(gg&'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-2srxg32!nx^$%hv(2snqst5dr#*_w!_g*vl4w$$he8&s3w(gg&')
 
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost 127.0.0.1').split()
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -55,11 +56,11 @@ WSGI_APPLICATION = 'DiplomBogdan.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'python_manual_db',
-        'USER': 'postgres',
-        'PASSWORD': 'kuzinvano228',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.environ.get('DB_NAME', 'python_manual_db'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'kuzinvano228'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
 
